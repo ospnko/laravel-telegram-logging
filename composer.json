@@ -4,7 +4,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4" : {
-      "ScaryLayer\\Logging" : "src"
+      "ScaryLayer\\Logging\\" : "src"
     }
   },
   "require": {
