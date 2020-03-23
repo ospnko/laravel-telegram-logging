@@ -1,0 +1,24 @@
+{
+  "name": "scary-layer/laravel-telegram-logging",
+  "description": "Logging to telegram chat throught bot",
+  "license": "MIT",
+  "autoload": {
+    "psr-4" : {
+      "ScaryLayer\\Logging" : "src"
+    }
+  },
+  "require": {
+    "php": "^7.2.5",
+    "monolog/monolog": "^1.23|^2.0",
+    "laravel/framework": "^7.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "laravel": {
+      "providers": [
+        "ScaryLayer\\Logging\\TelegramServiceProvider"
+      ]
+    }
+  }
+}
