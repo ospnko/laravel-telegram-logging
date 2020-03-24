@@ -1,1 +1,1 @@
-# laravel-telegram-logging
+# Laravel telegram logging package

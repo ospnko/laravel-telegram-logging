@@ -4,19 +4,13 @@
   "license": "MIT",
   "autoload": {
     "psr-4" : {
-      "ScaryLayer\\Logging\\" : "src"
+      "ScaryLayer\\Logging\\Telegram\\" : "src"
     }
   },
   "require": {
     "php": "^7.2.5",
+    "laravel/framework": "^7.2",
     "monolog/monolog": "^1.23|^2.0",
-    "laravel/framework": "^7.0"
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "ScaryLayer\\Logging\\TelegramServiceProvider"
-      ]
-    }
+    "guzzlehttp/guzzle": "^6.3.1|^7.0"
   }
 }
