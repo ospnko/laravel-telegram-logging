@@ -44,8 +44,9 @@ class Handler extends AbstractProcessingHandler
 
     public function format($record)
     {
-        return "[{$record['level_name']}] <b>" . config('app.name') . "</b>\n"
-            . "———————————\n"
+        return "<b>" . config('app.name') . "</b>\n"
+            . "\n"
+            . "TYPE: <b>{$record['level_name']}</b>\n"
             . "TIME: " . now()->toDateTimeString() . "\n"
             . "ENV: {$record['channel']} \n"
             . "URL: " . request()->url() . "\n"
@@ -53,6 +54,6 @@ class Handler extends AbstractProcessingHandler
             . "\n"
             . "<b>{$record['message']}</b>\n"
             . $record['context']['exception']->getFile()
-            . " [{$record['context']['exception']->getLine()}]";
+            . " [{$record['context']['exception']->getLine()} line]";
     }
 }
