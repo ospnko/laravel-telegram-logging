@@ -61,7 +61,6 @@ class Handler extends AbstractProcessingHandler
 
         $response = $this->send($message);
 
-        dd($message);
         if ($response->status() != 200) {
             $exceptionMessage = 'Unable to log message to Telegram: '
                 . $response->body();
