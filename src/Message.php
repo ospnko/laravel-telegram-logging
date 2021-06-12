@@ -18,8 +18,20 @@ class Message implements Stringable
     {
         $text = strip_tags($text);
         $text = explode("\n", $text)[0];
+        $text = $this->limitStringLength($text);
 
         $this->message[] = "<b>$text</b>";
+
+        return $this;
+    }
+
+    /**
+     * Add code line to message
+     */
+    public function code(string $code): self
+    {
+        $code = $this->limitStringLength($code);
+        $this->message[] = "<pre>$code</pre>";
 
         return $this;
     }
@@ -30,6 +42,8 @@ class Message implements Stringable
     public function line(string $line): self
     {
         $line = strip_tags($line);
+        $line = $this->limitStringLength($line);
+
         $this->message[] = $line;
 
         return $this;
@@ -44,6 +58,7 @@ class Message implements Stringable
         bool $isBold = false
     ): self {
         $value = strip_tags($value);
+        $value = $this->limitStringLength($value);
         $value = $isBold ? "<b>$value</b>" : $value;
 
         $this->message[] = "$name: $value";
@@ -71,8 +86,6 @@ class Message implements Stringable
             $string .= "$line\n";
         }
 
-        $string = $this->limitStringLength($string);
-
         return $string;
     }
 
@@ -81,7 +94,7 @@ class Message implements Stringable
      */
     protected function limitStringLength(string $string): string
     {
-        $limit = 4000;
+        $limit = 500;
 
         return mb_strlen($string) > $limit
             ? mb_substr($string, 0, $limit) . '...'

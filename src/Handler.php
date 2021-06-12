@@ -55,11 +55,13 @@ class Handler extends AbstractProcessingHandler
             ->property('URL', request()->url())
             ->property('IP', request()->ip())
             ->space()
-            ->bold($record['message'])
+            ->code($record['message'])
+            ->space()
             ->line("{$exception->getFile()} [{$exception->getLine()} line]");
 
         $response = $this->send($message);
 
+        dd($message);
         if ($response->status() != 200) {
             $exceptionMessage = 'Unable to log message to Telegram: '
                 . $response->body();
