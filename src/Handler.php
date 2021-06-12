@@ -3,57 +3,81 @@
 namespace ScaryLayer\Logging\Telegram;
 
 use Exception;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Monolog\Logger;
 use Monolog\Handler\AbstractProcessingHandler;
 
 class Handler extends AbstractProcessingHandler
 {
-    const API_DOMAIN = 'https://api.telegram.org/bot';
+    /**
+     * Telegram API address
+     */
+    protected string $api = 'https://api.telegram.org';
 
-    protected $token;
-    protected $chatId;
+    /**
+     * Telegram bot token
+     */
+    protected string $token;
 
+    /**
+     * Telegram chat id of chat where message will be sent
+     */
+    protected string $chatId;
+
+    /**
+     * Create new TelegramLogHandler instance
+     */
     public function __construct($level)
     {
         parent::__construct(Logger::toMonologLevel($level), true);
 
-        if (!config('logging.channels.telegram')) {
+        if (!config('logging.channels.telegram'))
             throw new Exception('Telegram logging configuration not found');
-        }
 
-        $this->token  = config('logging.channels.telegram.token');
+        $this->token = config('logging.channels.telegram.token');
         $this->chatId = config('logging.channels.telegram.chat_id');
     }
 
-    public function write($record): void
+    /**
+     * Writes the record down to the log of the implementing handler
+     */
+    public function write(array $record): void
     {
-        $this->send($this->format($record));
+        $exception = $record['context']['exception'];
+
+        $message = (new Message)
+            ->bold(config('app.name'))
+            ->space()
+            ->property('TYPE', $record['level_name'], true)
+            ->property('TIME', now()->toDateTimeString())
+            ->property('ENV', $record['channel'])
+            ->property('URL', request()->url())
+            ->property('IP', request()->ip())
+            ->space()
+            ->bold($record['message'])
+            ->line("{$exception->getFile()} [{$exception->getLine()} line]");
+
+        $response = $this->send($message);
+
+        if ($response->status() != 200) {
+            $exceptionMessage = 'Unable to log message to Telegram: '
+                . $response->body();
+            throw new Exception($exceptionMessage);
+        }
     }
 
-    public function send(string $message)
+    /**
+     * Send request to Telegram Bot API
+     */
+    protected function send(string $message): Response
     {
-        $url = self::API_DOMAIN . $this->token . '/sendMessage';
+        $url = "$this->api/bot$this->token/sendMessage";
 
-        return Http::get($url, [
+        return Http::post($url, [
             'text' => $message,
             'chat_id' => $this->chatId,
             'parse_mode' => 'html'
         ]);
-    }
-
-    public function format($record)
-    {
-        return "<b>" . config('app.name') . "</b>\n"
-            . "\n"
-            . "TYPE: <b>{$record['level_name']}</b>\n"
-            . "TIME: " . now()->toDateTimeString() . "\n"
-            . "ENV: {$record['channel']} \n"
-            . "URL: " . request()->url() . "\n"
-            . "IP: " . request()->ip() . "\n"
-            . "\n"
-            . "<b>{$record['message']}</b>\n"
-            . $record['context']['exception']->getFile()
-            . " [{$record['context']['exception']->getLine()} line]";
     }
 }
