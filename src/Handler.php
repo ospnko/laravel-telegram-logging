@@ -32,8 +32,9 @@ class Handler extends AbstractProcessingHandler
     {
         parent::__construct(Logger::toMonologLevel($level), true);
 
-        if (!config('logging.channels.telegram'))
+        if (!config('logging.channels.telegram')) {
             throw new Exception('Telegram logging configuration not found');
+        }
 
         $this->token = config('logging.channels.telegram.token');
         $this->chatId = config('logging.channels.telegram.chat_id');
@@ -44,9 +45,9 @@ class Handler extends AbstractProcessingHandler
      */
     public function write(array $record): void
     {
-        $exception = $record['context']['exception'];
+        $exception = $record['context']['exception'] ?? null;
 
-        $message = (new Message)
+        $message = (new Message())
             ->bold(config('app.name'))
             ->space()
             ->property('TYPE', $record['level_name'], true)
@@ -55,15 +56,20 @@ class Handler extends AbstractProcessingHandler
             ->property('URL', request()->url())
             ->property('IP', request()->ip())
             ->space()
-            ->code($record['message'])
-            ->space()
-            ->line("{$exception->getFile()} [{$exception->getLine()} line]");
+            ->code($record['message']);
+
+        if ($exception !== null) {
+            $message
+                ->space()
+                ->line("{$exception->getFile()} [{$exception->getLine()} line]");
+        }
 
         $response = $this->send($message);
 
         if ($response->status() != 200) {
             $exceptionMessage = 'Unable to log message to Telegram: '
                 . $response->body();
+
             throw new Exception($exceptionMessage);
         }
     }
